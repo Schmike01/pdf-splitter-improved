@@ -1523,8 +1523,7 @@
                         name: file.name,
                         size: file.size,
                         pageCount: pdfDocument.numPages,
-                        pdfDocument: pdfDocument,
-                        arrayBuffer: arrayBuffer
+                        pdfDocument: pdfDocument
                     };
                     
                     appState.batchFiles.push(batchFile);
@@ -1928,8 +1927,11 @@
             const batchFile = appState.batchFiles[fileIndex];
             const selectedPages = Array.from(appState.batchSelectedPages[fileIndex]).sort((a, b) => a - b);
             
-            // Load PDF with pdf-lib
-            const pdfDoc = await PDFLib.PDFDocument.load(batchFile.arrayBuffer);
+            // Re-read the file to avoid ArrayBuffer detachment issues
+            const arrayBuffer = await readFileAsArrayBuffer(batchFile.file);
+            
+            // Load PDF with pdf-lib using the fresh ArrayBuffer
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
             
             // Create a new document
             const newPdfDoc = await PDFLib.PDFDocument.create();
